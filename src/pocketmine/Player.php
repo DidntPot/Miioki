@@ -1869,13 +1869,17 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$personaPieces = [];
 		$pieceTintColors = [];
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_390){
-		    foreach($packet->clientData["PersonaPieces"] as $piece){
-		        include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaSkinPiece.php';
-		        $personaPiece[] = new PersonaSkinPiece($piece["PieceId"], $piece["PieceType"], $piece["PackId"], $piece["IsDefault"], $piece["ProductId"]);
+		    if(isset($packet->clientData["PersonaPieces"])){
+		        foreach($packet->clientData["PersonaPieces"] as $piece){
+		            include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaSkinPiece.php';
+		            $personaPiece[] = new PersonaSkinPiece($piece["PieceId"], $piece["PieceType"], $piece["PackId"], $piece["IsDefault"], $piece["ProductId"]);
+		        }
 		    }
-		    foreach($packet->clientData["PieceTintColors"] as $tintColor){
-		        include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php';
-		        $pieceTintColors[] = PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
+		    if(isset($packet->clientData["PieceTintColors"])){
+		        foreach($packet->clientData["PieceTintColors"] as $tintColor){
+		            include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php';
+		            $pieceTintColors[] = PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
+		        }
 		    }
 		}
 		$armSize = "";
