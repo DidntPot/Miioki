@@ -1878,7 +1878,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    if(isset($packet->clientData["PieceTintColors"])){
 		        foreach($packet->clientData["PieceTintColors"] as $tintColor){
 		            include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php';
-		            $pieceTintColors[] = PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
+		            $pieceTintColors[] = new PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
 		        }
 		    }
 		}
