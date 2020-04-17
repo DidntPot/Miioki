@@ -1,8 +1,8 @@
 # Information
 
-- Current version: 0.2
+- Current version: 0.3
 
-- Protocol support: 388, 389
+- Protocol support: 388, 389, 390
 
 - Min PHP Version: 7.2.0
 
