@@ -110,7 +110,7 @@ class SkinData{
 	}
 	
 	public function getPieceTintColors() : array{
-	    return $this->pieceTintColor;
+	    return $this->pieceTintColors;
 	}
 	
 	public function getSkinId() : string{

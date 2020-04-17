@@ -42,7 +42,7 @@ interface ProtocolInfo{
 	/** Accepted Minecraft: PE protocols */
 	public const ACCEPTED_PROTOCOLS = [
 	    self::PROTOCOL_388,
-	    selt::PROTOCO_389,
+	    self::PROTOCO_389,
 	    self::CURRENT_PROTOCOL
 	];
 	

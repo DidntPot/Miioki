@@ -166,7 +166,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			try{
 				if($packet->buffer !== ""){
 					$pk = new BatchPacket($packet->buffer);
-					$packet->setPlayerProtocol($player->getProtocol());
+					$pk->setPlayerProtocol($player->getProtocol());
 					$player->handleDataPacket($pk);
 				}
 			}catch(\Throwable $e){

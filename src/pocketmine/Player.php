@@ -1821,7 +1821,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	    return $this->protocol;
 	}
 	
-	public function (LoginPacket $packet) : bool{
+	public function handleLogin(LoginPacket $packet) : bool{
 		if($this->loggedIn){
 			return false;
 		}
@@ -1867,12 +1867,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], base64_decode($animation["Image"], true)), $animation["Type"], $animation["Frames"]);
 		}
 		$personaPieces = [];
-		$pieceTintColor = [];
+		$pieceTintColors = [];
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_390){
 		    foreach($packet->clientData["PersonaPieces"] as $piece){
+		        include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaSkinPiece.php';
 		        $personaPiece[] = new PersonaSkinPiece($piece["PieceId"], $piece["PieceType"], $piece["PackId"], $piece["IsDefault"], $piece["ProductId"]);
 		    }
 		    foreach($packet->clientData["PieceTintColors"] as $tintColor){
+		        include_once 'src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php';
 		        $pieceTintColors[] = PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
 		    }
 		}
@@ -1895,7 +1897,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			null,
 			$armSize,
 			$packet->clientData["SkinColor"] ?? "",
-			$perdonaPieces,
+			$personaPieces,
 			$pieceTintColors,
 			true
 		);

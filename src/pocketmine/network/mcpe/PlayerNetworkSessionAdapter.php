@@ -91,6 +91,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		$this->player = $player;
 	}
 
+	public function getProtocol() : int{
+	    return $this->player->getProtocol();
+	}
+
 	public function handleDataPacket(DataPacket $packet){
 		if(!$this->player->isConnected()){
 			return;

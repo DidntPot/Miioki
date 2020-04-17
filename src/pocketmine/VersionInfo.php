@@ -33,6 +33,6 @@ if(defined('pocketmine\_VERSION_INFO_INCLUDED')){
 const _VERSION_INFO_INCLUDED = true;
 
 const NAME = "Miioki";
-const BASE_VERSION = "3.11.7";
+const BASE_VERSION = "3.12.0";
 const IS_DEVELOPMENT_BUILD = false;
 const BUILD_NUMBER = 0;
