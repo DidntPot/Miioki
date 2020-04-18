@@ -65,6 +65,7 @@ use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\player\PlayerToggleFlightEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\player\PlayerToggleSprintEvent;
+use pocketmine\event\player\PlayerToggleSwimEvent;
 use pocketmine\event\player\PlayerTransferEvent;
 use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\form\Form;
@@ -2847,11 +2848,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_PARTICLE_PUNCH_BLOCK, $block->getRuntimeId() | ($packet->face << 24));
 				//TODO: destroy-progress level event
 				break;
-			case PlayerActionPacket::ACTION_START_SWIMMING:
-				break; //TODO
-			case PlayerActionPacket::ACTION_STOP_SWIMMING:
-				//TODO: handle this when it doesn't spam every damn tick (yet another spam bug!!)
-				break;
+            case PlayerActionPacket::ACTION_START_SWIMMING:
+                if(!$this->isSwimming()){
+                    $this->toggleSwim(true);
+                }
+                break;
+            case PlayerActionPacket::ACTION_STOP_SWIMMING:
+                if($this->isSwimming()){ // for spam issue
+                    $this->toggleSwim(false);
+                }
+                break;
 			case PlayerActionPacket::ACTION_INTERACT_BLOCK: //ignored (for now)
 				break;
 			default:
@@ -2883,6 +2889,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->setSneaking($sneak);
 		}
 	}
+	
+    public function toggleSwim(bool $swimming) : void{
+        $ev = new PlayerToggleSwimEvent($this, $swimming);
+        $ev->call();
+        if($ev->isCancelled()){
+            $this->sendData($this);
+        }else{
+            $this->setSwimming($swimming);
+        }
+    }
 
 	public function handleAnimate(AnimatePacket $packet) : bool{
 		if(!$this->spawned or !$this->isAlive()){
