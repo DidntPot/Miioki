@@ -44,6 +44,7 @@ use pocketmine\network\mcpe\protocol\types\StructureSettings;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
 use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
+use pocketmine\network\mcpe\protocol\types\StructureEditorData;
 
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
@@ -710,6 +711,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$result->mirror = $this->getByte();
 		$result->integrityValue = $this->getFloat();
 		$result->integritySeed = $this->getInt();
+		$result->pivot = $this->getVector3();
 
 		return $result;
 	}
@@ -728,5 +730,34 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putByte($structureSettings->mirror);
 		$this->putFloat($structureSettings->integrityValue);
 		$this->putInt($structureSettings->integritySeed);
+		$this->putVector3($structureSettings->pivot);
+	}
+	
+	protected function getStructureEditorData() : StructureEditorData{
+		$result = new StructureEditorData();
+
+		$result->structureName = $this->getString();
+		$result->structureDataField = $this->getString();
+
+		$result->includePlayers = $this->getBool();
+		$result->showBoundingBox = $this->getBool();
+
+		$result->structureBlockType = $this->getVarInt();
+		$result->structureSettings = $this->getStructureSettings();
+		$result->structureRedstoneSaveMove = $this->getVarInt();
+
+		return $result;
+	}
+	
+	protected function putStructureEditorData(StructureEditorData $structureEditorData) : void{
+		$this->putString($structureEditorData->structureName);
+		$this->putString($structureEditorData->structureDataField);
+
+		$this->putBool($structureEditorData->includePlayers);
+		$this->putBool($structureEditorData->showBoundingBox);
+
+		$this->putVarInt($structureEditorData->structureBlockType);
+		$this->putStructureSettings($structureEditorData->structureSettings);
+		$this->putVarInt($structureEditorData->structureRedstoneSaveMove);
 	}
 }
