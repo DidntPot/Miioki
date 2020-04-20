@@ -1,6 +1,6 @@
 # Information
 
-- Current version: 0.3
+- Current version: 0.4
 
 - Protocol support: 388, 389, 390
 
