@@ -662,9 +662,36 @@ class Utils{
 	 * @return string[] an array of tagName => tag value. If the tag has no value, an empty string is used as the value.
 	 */
 	public static function parseDocComment(string $docComment) : array{
-		preg_match_all('/(*ANYCRLF)^[\t ]*\* @([a-zA-Z]+)(?:[\t ]+(.+))?[\t ]*$/m', $docComment, $matches);
-
+		if($rawDocComment === false){ //usually empty doc comment, but this is safer and statically analysable
+			return [];
+		}
 		return array_combine($matches[1], $matches[2]);
+	}
+
+   /**
+	 * @return string[][]
+	 * @phpstan-return list<array{string}>
+	 */
+	public function parseDocCommentOneLineProvider() : array{
+		return [
+			["/** @ignoreCancelled true dummy */"],
+			["/**@ignoreCancelled true dummy*/"],
+			["/** @ignoreCancelled    true dummy */"]
+		];
+	}
+
+	/**
+	 * @dataProvider parseDocCommentOneLineProvider
+	 */
+	public function testParseOneLineDocComment(string $comment) : void{
+		$tags = Utils::parseDocComment($comment);
+		self::assertArrayHasKey("ignoreCancelled", $tags);
+		self::assertEquals("true dummy", $tags["ignoreCancelled"]);
+	}
+
+	public function testParseEmptyDocComment() : void{
+		$tags = Utils::parseDocComment("");
+		self::assertCount(0, $tags);
 	}
 
 	/**
