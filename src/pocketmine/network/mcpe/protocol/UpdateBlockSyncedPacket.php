@@ -31,9 +31,9 @@ class UpdateBlockSyncedPacket extends UpdateBlockPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_BLOCK_SYNCED_PACKET;
 
 	/** @var int */
-	public $entityUniqueId = 0;
+	public $entityUniqueId;
 	/** @var int */
-	public $uvarint64_2 = 0;
+	public $uvarint64_2;
 
 	protected function decodePayload(){
 		parent::decodePayload();
