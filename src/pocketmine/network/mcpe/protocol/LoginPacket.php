@@ -36,8 +36,6 @@ use function in_array;
 class LoginPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
 
-	public const EDITION_POCKET = 0;
-
 	/** @var string */
 	public $username;
 	/** @var int */
