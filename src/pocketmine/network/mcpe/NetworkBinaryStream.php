@@ -45,6 +45,7 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
 use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
 use pocketmine\network\mcpe\protocol\types\StructureEditorData;
+use pocketmine\network\mcpe\protocol\types\GameRuleType;
 
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
@@ -602,7 +603,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @return mixed[][], members are in the structure [name => [type, value]]
 	 * @phpstan-return array<string, array{0: int, 1: bool|int|float}>
 	 */
-	public function getGameRules() : array{
+	public function () : array{
 		$count = $this->getUnsignedVarInt();
 		$rules = [];
 		for($i = 0; $i < $count; ++$i){
@@ -610,13 +611,13 @@ class NetworkBinaryStream extends BinaryStream{
 			$type = $this->getUnsignedVarInt();
 			$value = null;
 			switch($type){
-				case 1:
+				case GameRuleType::BOOL:
 					$value = $this->getBool();
 					break;
-				case 2:
+				case GameRuleType::INT:
 					$value = $this->getUnsignedVarInt();
 					break;
-				case 3:
+				case GameRuleType::FLOAT:
 					$value = $this->getLFloat();
 					break;
 			}
@@ -640,13 +641,13 @@ class NetworkBinaryStream extends BinaryStream{
 			$this->putString($name);
 			$this->putUnsignedVarInt($rule[0]);
 			switch($rule[0]){
-				case 1:
+				case GameRuleType::BOOL:
 					$this->putBool($rule[1]);
 					break;
-				case 2:
+				case GameRuleType::INT:
 					$this->putUnsignedVarInt($rule[1]);
 					break;
-				case 3:
+				case GameRuleType::FLOAT:
 					$this->putLFloat($rule[1]);
 					break;
 			}

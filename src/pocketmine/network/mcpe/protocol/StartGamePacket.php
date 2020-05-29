@@ -33,6 +33,8 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\RuntimeBlockMapping;
 use pocketmine\network\mcpe\protocol\types\MultiplayerGameVisibility;
+use pocketmine\network\mcpe\protocol\types\GameRuleType;
+
 use function count;
 use function file_get_contents;
 use function json_decode;
@@ -108,7 +110,7 @@ class StartGamePacket extends DataPacket{
 	 * @phpstan-var array<string, array{0: int, 1: bool|int|float}>
 	 */
 	public $gameRules = [ //TODO: implement this
-		"naturalregeneration" => [1, false] //Hack for client side regeneration
+		"naturalregeneration" => [GameRuleType::BOOL, false] //Hack for client side regeneration
 	];
 	/** @var bool */
 	public $hasBonusChestEnabled = false;
