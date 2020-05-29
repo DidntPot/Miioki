@@ -3773,7 +3773,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->headYaw = $yaw;
 		$pk->yaw = $yaw;
 		$pk->mode = $mode;
-
+		$pk->onGround = $this->onGround;
+		
 		if($targets !== null){
 			$this->server->broadcastPacket($targets, $pk);
 		}else{
