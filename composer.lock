@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6870d7b85559a32e2929692e0a0da169",
+    "content-hash": "f9441d6ef46bddf299b260c672bfa54b",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -276,16 +276,16 @@
         },
         {
             "name": "pocketmine/nbt",
-            "version": "0.2.13",
+            "version": "0.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pmmp/NBT.git",
-                "reference": "6fc56f864a5375471f6e2d0f9f89f2462a1d8433"
+                "reference": "b31dca98443328c4bab76dc1b84c1473c79be20e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pmmp/NBT/zipball/6fc56f864a5375471f6e2d0f9f89f2462a1d8433",
-                "reference": "6fc56f864a5375471f6e2d0f9f89f2462a1d8433",
+                "url": "https://api.github.com/repos/pmmp/NBT/zipball/b31dca98443328c4bab76dc1b84c1473c79be20e",
+                "reference": "b31dca98443328c4bab76dc1b84c1473c79be20e",
                 "shasum": ""
             },
             "require": {
@@ -295,8 +295,8 @@
                 "pocketmine/binaryutils": "^0.1.9"
             },
             "require-dev": {
-                "irstea/phpunit-shim": "^7.5",
-                "phpstan/phpstan": "^0.12.8"
+                "irstea/phpunit-shim": "^7.5 || ^8.0",
+                "phpstan/phpstan": "^0.12.11"
             },
             "type": "library",
             "autoload": {
@@ -309,7 +309,7 @@
                 "LGPL-3.0"
             ],
             "description": "PHP library for working with Named Binary Tags",
-            "time": "2020-01-28T17:03:46+00:00"
+            "time": "2020-04-15T11:29:25+00:00"
         },
         {
             "name": "pocketmine/raklib",
@@ -424,11 +424,11 @@
     "packages-dev": [
         {
             "name": "irstea/phpunit-shim",
-            "version": "8.5.3",
+            "version": "8.5.4",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.irstea.fr/pole-is/tools/phpunit-shim.git",
-                "reference": "b55d058d7ad3cf516068f22138a5b8fb724605db"
+                "reference": "25b3ffe1502bfd35d5cd23dc37f2f2e70cdf0b54"
             },
             "require": {
                 "ext-dom": "*",
@@ -474,24 +474,27 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2020-04-01T02:21:12+00:00"
+            "time": "2020-04-24T02:20:21+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.18",
+            "version": "0.12.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "1ce27fe29c8660a27926127d350d53d80c4d4286"
+                "reference": "9619551d68b2d4c0d681a8df73f3c847c798ee64"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1ce27fe29c8660a27926127d350d53d80c4d4286",
-                "reference": "1ce27fe29c8660a27926127d350d53d80c4d4286",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9619551d68b2d4c0d681a8df73f3c847c798ee64",
+                "reference": "9619551d68b2d4c0d681a8df73f3c847c798ee64",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1"
+            },
+            "conflict": {
+                "phpstan/phpstan-shim": "*"
             },
             "bin": [
                 "phpstan",
@@ -513,25 +516,39 @@
                 "MIT"
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
-            "time": "2020-03-22T16:51:47+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/ondrejmirtes",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/phpstan",
+                    "type": "patreon"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/phpstan/phpstan",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-05-10T20:36:16+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "0.12.6",
+            "version": "0.12.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "26394996368b6d033d012547d3197f4e07e23021"
+                "reference": "7232c17e2493dc598173da784477ce0afb2c4e0e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/26394996368b6d033d012547d3197f4e07e23021",
-                "reference": "26394996368b6d033d012547d3197f4e07e23021",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/7232c17e2493dc598173da784477ce0afb2c4e0e",
+                "reference": "7232c17e2493dc598173da784477ce0afb2c4e0e",
                 "shasum": ""
             },
             "require": {
                 "php": "~7.1",
-                "phpstan/phpstan": "^0.12.4"
+                "phpstan/phpstan": "^0.12.6"
             },
             "conflict": {
                 "phpunit/phpunit": "<7.0"
@@ -569,7 +586,7 @@
                 "MIT"
             ],
             "description": "PHPUnit extensions and rules for PHPStan",
-            "time": "2020-01-10T12:07:21+00:00"
+            "time": "2020-04-17T08:04:10+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
@@ -649,5 +666,6 @@
         "ext-zip": "*",
         "ext-zlib": ">=1.2.11"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }
