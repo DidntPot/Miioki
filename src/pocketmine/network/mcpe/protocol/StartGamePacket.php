@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\types\RuntimeBlockMapping;
 use pocketmine\network\mcpe\protocol\types\MultiplayerGameVisibility;
 use pocketmine\network\mcpe\protocol\types\GameRuleType;
 use pocketmine\network\mcpe\protocol\types\EducationEditionOffer;
+use pocketmine\network\mcpe\protocol\types\GeneratorType;
 
 use function count;
 use function file_get_contents;
@@ -69,7 +70,7 @@ class StartGamePacket extends DataPacket{
 	/** @var int */
 	public $dimension;
 	/** @var int */
-	public $generator = 1; //default infinite - 0 old, 1 infinite, 2 flat
+	public $generator = GeneratorType::OVERWORLD;
 	/** @var int */
 	public $worldGamemode;
 	/** @var int */
