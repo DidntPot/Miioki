@@ -154,6 +154,7 @@ use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\SkinData;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
+use pocketmine\network\mcpe\protocol\types\GameMode
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\VerifyLoginTask;
@@ -1337,12 +1338,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * TODO: remove this when Spectator Mode gets added properly to MCPE
 	 */
 	public static function getClientFriendlyGamemode(int $gamemode) : int{
-		$gamemode &= 0x03;
-		if($gamemode === Player::SPECTATOR){
-			return Player::CREATIVE;
-		}
-
-		return $gamemode;
+		static $map = [
+			self::SURVIVAL => GameMode::SURVIVAL,
+			self::CREATIVE => GameMode::CREATIVE,
+			self::ADVENTURE => GameMode::ADVENTURE,
+			self::SPECTATOR => GameMode::SPECTATOR
+		];
+		return $map[$gamemode & 0x3];
 	}
 
 	/**
