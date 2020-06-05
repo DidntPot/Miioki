@@ -38,6 +38,14 @@ class DoublePlant extends Flowable{
 		$this->meta = $meta;
 	}
 
+	public function getFlameEncouragement() : int{
+		return 60;
+	}
+
+	public function getFlammability() : int{
+		return 100;
+	}
+
 	public function canBeReplaced() : bool{
 		return $this->getVariant() === 2 or $this->getVariant() === 3; //grass or fern
 	}

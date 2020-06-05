@@ -58,6 +58,7 @@ use pocketmine\level\particle\SporeParticle;
 use pocketmine\level\particle\TerrainParticle;
 use pocketmine\level\particle\WaterDripParticle;
 use pocketmine\level\particle\WaterParticle;
+use pocketmine\level\particle\EntityFlameParticle;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\utils\Random;
@@ -172,6 +173,8 @@ class ParticleCommand extends VanillaCommand{
 				return new PortalParticle($pos);
 			case "flame":
 				return new FlameParticle($pos);
+			case "mobflame":
+				return new EntityFlameParticle($pos);
 			case "lava":
 				return new LavaParticle($pos);
 			case "reddust":
