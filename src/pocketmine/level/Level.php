@@ -1895,15 +1895,6 @@ class Level implements ChunkManager, Metadatable{
 				if(count($this->getCollidingEntities($collisionBox)) > 0){
 					return false;  //Entity in block
 				}
-
-				if($player !== null){
-					if(($diff = $player->getNextPosition()->subtract($player->getPosition())) and $diff->lengthSquared() > 0.00001){
-						$bb = $player->getBoundingBox()->offsetCopy($diff->x, $diff->y, $diff->z);
-						if($collisionBox->intersectsWith($bb)){
-							return false; //Inside player BB
-						}
-					}
-				}
 			}
 		}
 
