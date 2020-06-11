@@ -1,6 +1,3 @@
 # Information
-
-- Current version: 0.5
-
-- Protocol support: 388, 389, 390
-
+- Supported Minecraft: PE Protocols: 388 (1.13), 389 (1.14.30), 390 (1.14.60)
+- Current Miioki version: 0.9-beta
