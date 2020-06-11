@@ -128,9 +128,11 @@ class Level implements ChunkManager, Metadatable{
 	public const Y_MASK = 0xFF;
 	public const Y_MAX = 0x100; //256
 
-	public const TIME_DAY = 0;
+	public const TIME_DAY = 1000;
+	public const TIME_NOON = 6000;
 	public const TIME_SUNSET = 12000;
-	public const TIME_NIGHT = 14000;
+	public const TIME_NIGHT = 13000;
+	public const TIME_MIDNIGHT = 18000;
 	public const TIME_SUNRISE = 23000;
 
 	public const TIME_FULL = 24000;
@@ -935,7 +937,7 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		if($resetTime){
-			$time = $this->getTime() % Level::TIME_FULL;
+			$time = $this->getTimeOfDay();
 
 			if($time >= Level::TIME_NIGHT and $time < Level::TIME_SUNRISE){
 				$this->setTime($this->getTime() + Level::TIME_FULL - $time);
@@ -1764,7 +1766,7 @@ class Level implements ChunkManager, Metadatable{
 				if($tag instanceof ListTag){
 					foreach($tag as $v){
 						if($v instanceof StringTag){
-							$entry = ItemFactory::fromString($v->getValue());
+							$entry = ItemFactory::fromStringSingle($v->getValue());
 							if($entry->getId() > 0 and $entry->getBlock()->getId() === $target->getId()){
 								$canBreak = true;
 								break;
@@ -1856,17 +1858,17 @@ class Level implements ChunkManager, Metadatable{
 
 		if($player !== null){
 			$ev = new PlayerInteractEvent($player, $item, $blockClicked, $clickVector, $face, PlayerInteractEvent::RIGHT_CLICK_BLOCK);
-			if($this->checkSpawnProtection($player, $blockClicked)){
+			if($this->checkSpawnProtection($player, $blockClicked) or $player->isSpectator()){
 				$ev->setCancelled(); //set it to cancelled so plugins can bypass this
 			}
 
 			$ev->call();
 			if(!$ev->isCancelled()){
-				if(!$player->isSneaking() and $blockClicked->onActivate($item, $player)){
+				if((!$player->isSneaking() or $item->isNull()) and $blockClicked->onActivate($item, $player)){
 					return true;
 				}
 
-				if(!$player->isSneaking() and $item->onActivate($player, $blockReplace, $blockClicked, $face, $clickVector)){
+				if($item->onActivate($player, $blockReplace, $blockClicked, $face, $clickVector)){
 					return true;
 				}
 			}else{
@@ -1900,7 +1902,7 @@ class Level implements ChunkManager, Metadatable{
 
 		if($player !== null){
 			$ev = new BlockPlaceEvent($player, $hand, $blockReplace, $blockClicked, $item);
-			if($this->checkSpawnProtection($player, $blockClicked)){
+			if($this->checkSpawnProtection($player, $blockReplace) or $player->isSpectator()){
 				$ev->setCancelled();
 			}
 
@@ -1910,7 +1912,7 @@ class Level implements ChunkManager, Metadatable{
 				if($tag instanceof ListTag){
 					foreach($tag as $v){
 						if($v instanceof StringTag){
-							$entry = ItemFactory::fromString($v->getValue());
+							$entry = ItemFactory::fromStringSingle($v->getValue());
 							if($entry->getId() > 0 and $entry->getBlock()->getId() === $blockClicked->getId()){
 								$canPlace = true;
 								break;
@@ -2829,6 +2831,13 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function getTime() : int{
 		return $this->time;
+	}
+
+	/**
+	 * Returns the current time of day
+	 */
+	public function getTimeOfDay() : int{
+		return $this->time % self::TIME_FULL;
 	}
 
 	/**

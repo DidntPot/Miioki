@@ -30,11 +30,12 @@ namespace pocketmine {
 	use pocketmine\utils\Timezone;
 	use pocketmine\utils\Utils;
 	use pocketmine\utils\VersionString;
+	use pocketmine\utils\Process;
 	use pocketmine\wizard\SetupWizard;
 
 	require_once __DIR__ . '/VersionInfo.php';
 
-	const MIN_PHP_VERSION = "7.2.0";
+	const MIN_PHP_VERSION = "7.3.0";
 
 	/**
 	 * @param string $message
@@ -280,7 +281,7 @@ namespace pocketmine {
 
 			if(ThreadManager::getInstance()->stopAll() > 0){
 				$logger->debug("Some threads could not be stopped, performing a force-kill");
-				Utils::kill(getmypid());
+				Process::kill(getmypid());
 			}
 		}while(false);
 

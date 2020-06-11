@@ -38,14 +38,6 @@ class DoublePlant extends Flowable{
 		$this->meta = $meta;
 	}
 
-	public function getFlameEncouragement() : int{
-		return 60;
-	}
-
-	public function getFlammability() : int{
-		return 100;
-	}
-
 	public function canBeReplaced() : bool{
 		return $this->getVariant() === 2 or $this->getVariant() === 3; //grass or fern
 	}
@@ -65,8 +57,8 @@ class DoublePlant extends Flowable{
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		$id = $blockReplace->getSide(Vector3::SIDE_DOWN)->getId();
 		if(($id === Block::GRASS or $id === Block::DIRT) and $blockReplace->getSide(Vector3::SIDE_UP)->canBeReplaced()){
-			$this->getLevel()->setBlock($blockReplace, $this, false, false);
-			$this->getLevel()->setBlock($blockReplace->getSide(Vector3::SIDE_UP), BlockFactory::get($this->id, $this->meta | self::BITFLAG_TOP), false, false);
+			$this->getLevelNonNull()->setBlock($blockReplace, $this, false, false);
+			$this->getLevelNonNull()->setBlock($blockReplace->getSide(Vector3::SIDE_UP), BlockFactory::get($this->id, $this->meta | self::BITFLAG_TOP), false, false);
 
 			return true;
 		}
@@ -93,7 +85,7 @@ class DoublePlant extends Flowable{
 
 	public function onNearbyBlockChange() : void{
 		if(!$this->isValidHalfPlant() or (($this->meta & self::BITFLAG_TOP) === 0 and $this->getSide(Vector3::SIDE_DOWN)->isTransparent())){
-			$this->getLevel()->useBreakOn($this);
+			$this->getLevelNonNull()->useBreakOn($this);
 		}
 	}
 
@@ -131,5 +123,13 @@ class DoublePlant extends Flowable{
 		}
 
 		return parent::getAffectedBlocks();
+	}
+
+	public function getFlameEncouragement() : int{
+		return 60;
+	}
+
+	public function getFlammability() : int{
+		return 100;
 	}
 }

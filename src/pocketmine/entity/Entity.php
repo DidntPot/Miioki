@@ -312,8 +312,8 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 	public const DATA_FLAG_DELAYED_ATTACKING = 84;
 	public const DATA_FLAG_AVOIDING_MOBS = 85;
 	public const DATA_FLAG_FACING_TARGET_TO_RANGE_ATTACK = 86;
-	public const DATA_FLAG_HIDDEN_WHEN_INVISIBLE = 87;
- 	public const DATA_FLAG_IS_IN_UI = 88;
+	public const DATA_FLAG_HIDDEN_WHEN_INVISIBLE = 87; //??????????????????
+	public const DATA_FLAG_IS_IN_UI = 88;
 	public const DATA_FLAG_STALKING = 89;
 	public const DATA_FLAG_EMOTING = 90;
 	public const DATA_FLAG_CELEBRATING = 91;
@@ -718,14 +718,6 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 
 	public function setSneaking(bool $value = true) : void{
 		$this->setGenericFlag(self::DATA_FLAG_SNEAKING, $value);
-	}
-	
-	public function isSwimming() : bool{
-		return $this->getGenericFlag(self::DATA_FLAG_SWIMMING);
-	}
-
-	public function setSwimming(bool $value = true) : void{
-		$this->setGenericFlag(self::DATA_FLAG_SWIMMING, $value);
 	}
 
 	public function isSprinting() : bool{
@@ -1179,7 +1171,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 		if($this->onGround){
 			$pk->flags |= MoveActorAbsolutePacket::FLAG_GROUND;
 		}
-		
+
 		$this->level->broadcastPacketToViewers($this, $pk);
 	}
 
@@ -1758,7 +1750,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 		}
 
 		if($pos instanceof Position and $pos->level !== null and $pos->level !== $this->level){
-			if(!$this->switchLevel($pos->getLevel())){
+			if(!$this->switchLevel($pos->getLevelNonNull())){
 				return false;
 			}
 		}
@@ -1864,7 +1856,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 			$pitch = $pitch ?? $pos->pitch;
 		}
 		$from = Position::fromObject($this, $this->level);
-		$to = Position::fromObject($pos, $pos instanceof Position ? $pos->getLevel() : $this->level);
+		$to = Position::fromObject($pos, $pos instanceof Position ? $pos->getLevelNonNull() : $this->level);
 		$ev = new EntityTeleportEvent($this, $from, $to);
 		$ev->call();
 		if($ev->isCancelled()){
@@ -1876,7 +1868,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 		$this->setMotion($this->temporalVector->setComponents(0, 0, 0));
 		if($this->setPositionAndRotation($pos, $yaw ?? $this->yaw, $pitch ?? $this->pitch)){
 			$this->resetFallDistance();
-			$this->onGround = true;
+			$this->setForceMovementUpdate();
 
 			$this->updateMovement(true);
 
@@ -1929,7 +1921,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 	protected function sendSpawnPacket(Player $player) : void{
 		$pk = new AddActorPacket();
 		$pk->entityRuntimeId = $this->getId();
-		$pk->type = static::NETWORK_ID;
+		$pk->type = AddActorPacket::LEGACY_ID_MAP_BC[static::NETWORK_ID];
 		$pk->position = $this->asVector3();
 		$pk->motion = $this->getMotion();
 		$pk->yaw = $this->yaw;
@@ -1942,7 +1934,12 @@ abstract class Entity extends Location implements Metadatable, EntityIds{
 	}
 
 	public function spawnTo(Player $player) : void{
-		if(!isset($this->hasSpawned[$player->getLoaderId()]) and $this->chunk !== null and isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])){
+		if(
+			!isset($this->hasSpawned[$player->getLoaderId()]) and
+			$this->chunk !== null and
+			isset($player->usedChunks[$chunkHash = Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())]) and
+			$player->usedChunks[$chunkHash] === true
+		){
 			$this->hasSpawned[$player->getLoaderId()] = $player;
 
 			$this->sendSpawnPacket($player);

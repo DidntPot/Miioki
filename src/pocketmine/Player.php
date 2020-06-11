@@ -336,10 +336,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var bool[] map: raw UUID (string) => bool */
 	protected $hiddenPlayers = [];
 
-	/** @var Vector3|null */
+	/** @var float */
 	protected $moveRateLimit = 10 * self::MOVES_PER_TICK;
 	/** @var bool */
 	protected $forceMoveSync = false;
+	/** @var float|null */
+	protected $lastMovementProcess = null;
 	/** @var int */
 	protected $inAirTicks = 0;
 	/** @var float */
@@ -531,7 +533,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function spawnTo(Player $player) : void{
-		if($this->spawned and $player->spawned and $this->isAlive() and $player->isAlive() and $player->getLevel() === $this->level and $player->canSee($this) and !$this->isSpectator()){
+		if($this->spawned and $player->spawned and $this->isAlive() and $player->isAlive() and $player->getLevelNonNull() === $this->level and $player->canSee($this) and !$this->isSpectator()){
 			parent::spawnTo($player);
 		}
 	}
@@ -916,8 +918,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/**
 	 * Resets the player's cooldown time for the given item back to the maximum.
 	 */
-	public function resetItemCooldown(Item $item) : void{
-		$ticks = $item->getCooldownTicks();
+	public function resetItemCooldown(Item $item, ?int $ticks) : void{
+		$ticks = $ticks ?? $item->getCooldownTicks();
 		if($ticks > 0){
 			$this->usedItemsCooldown[$item->getId()] = $this->server->getTick() + $ticks;
 		}
@@ -1221,7 +1223,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!($pos instanceof Position)){
 			$level = $this->level;
 		}else{
-			$level = $pos->getLevel();
+			$level = $pos->getLevelNonNull();
 		}
 		$this->spawnPosition = new Position($pos->x, $pos->y, $pos->z, $level);
 		$pk = new SetSpawnPositionPacket();
@@ -1377,9 +1379,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->isSpectator()){
 			$this->setFlying(true);
 			$this->keepMovement = true;
+			$this->onGround = true;
+			$this->sendPosition($this, null, null, MovePlayerPacket::MODE_TELEPORT);
 			$this->despawnFromAll();
 		}else{
 			$this->keepMovement = $this->allowMovementCheats;
+			$this->checkGroundState(0, 0, 0, 0, 0, 0);
 			if($this->isSurvival()){
 				$this->setFlying(false);
 			}
@@ -1500,11 +1505,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	protected function checkGroundState(float $movX, float $movY, float $movZ, float $dx, float $dy, float $dz) : void{
-		$bb = clone $this->boundingBox;
-		$bb->minY = $this->y - 0.2;
-		$bb->maxY = $this->y + 0.2;
-
-		$this->onGround = $this->isCollided = count($this->level->getCollisionBlocks($bb, true)) > 0;
+		if($this->isSpectator()){
+			$this->onGround = false;
+		}else{
+			$bb = clone $this->boundingBox;
+			$bb->minY = $this->y - 0.2;
+			$bb->maxY = $this->y + 0.2;
+			$this->onGround = $this->isCollided = count($this->level->getCollionBlocks($bb, true)) > 0;
+		}
 	}
 
 	public function canBeMovedByCurrents() : bool{
@@ -1894,32 +1902,55 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$animations = [];
 		foreach($packet->clientData["AnimatedImageData"] as $animation){
-			$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], base64_decode($animation["Image"], true)), $animation["Type"], $animation["Frames"]);
+			$animations[] = new SkinAnimation(
+				new SkinImage(
+					$animation["ImageHeight"], 
+					$animation["ImageWidth"],
+					base64_decode($animation["Image"], true)),
+				$animation["Type"],
+				$animation["Frames"]
+			);
 		}
 		$personaPieces = [];
 		$pieceTintColors = [];
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_390){
-		    if(isset($packet->clientData["PersonaPieces"])){
-		        foreach($packet->clientData["PersonaPieces"] as $piece){
-		            $personaPiece[] = new PersonaSkinPiece($piece["PieceId"], $piece["PieceType"], $piece["PackId"], $piece["IsDefault"], $piece["ProductId"]);
-		        }
-		    }
-		    if(isset($packet->clientData["PieceTintColors"])){
-		        foreach($packet->clientData["PieceTintColors"] as $tintColor){
-		            $pieceTintColors[] = new PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
-		        }
-		    }
+			if(isset($packet->clientData["PersonaPieces"])){
+				foreach($packet->clientData["PersonaPieces"] as $piece){
+					$personaPiece[] = new PersonaSkinPiece(
+						$piece["PieceId"],
+						$piece["PieceType"],
+						$piece["PackId"], $piece["IsDefault"],
+						$piece["ProductId"]
+					);
+				}
+			}
+			if(isset($packet->clientData["PieceTintColors"])){
+				foreach($packet->clientData["PieceTintColors"] as $tintColor){
+					$pieceTintColors[] = new PersonaPieceTintColor(
+						$tintColor["PieceType"],
+						$tintColor["Colors"]
+					);
+				}
+			}
 		}
 		$armSize = "";
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_390){
-		    $armSize = $packet->clientData["ArmSize"] ?? SkinData::ARM_SIZE_WIDE;
+			$armSize = $packet->clientData["ArmSize"] ?? SkinData::ARM_SIZE_WIDE;
 		}
 		$skinData = new SkinData(
 			$packet->clientData["SkinId"],
 			base64_decode($packet->clientData["SkinResourcePatch"] ?? "", true),
-			new SkinImage($packet->clientData["SkinImageHeight"], $packet->clientData["SkinImageWidth"], base64_decode($packet->clientData["SkinData"], true)),
+			new SkinImage(
+				$packet->clientData["SkinImageHeight"],
+				$packet->clientData["SkinImageWidth"],
+				base64_decode($packet->clientData["SkinData"], true)
+			),
 			$animations,
-			new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "", true)),
+			new SkinImage(
+				$packet->clientData["CapeImageHeight"],
+				$packet->clientData["CapeImageWidth"],
+				base64_decode($packet->clientData["CapeData"] ?? "", true)
+			),
 			base64_decode($packet->clientData["SkinGeometryData"] ?? "", true),
 			base64_decode($packet->clientData["SkinAnimationData"] ?? "", true),
 			$packet->clientData["PremiumSkin"] ?? false,
@@ -2301,7 +2332,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
 		//TODO: add events so plugins can change this
-		$this->getLevel()->broadcastPacketToViewers($this, $packet);
+		$this->getLevelNonNull()->broadcastPacketToViewers($this, $packet);
 		return true;
 	}
 
@@ -2432,7 +2463,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 						$this->setUsingItem(false);
 
-						if(!$this->canInteract($blockVector->add(0.5, 0.5, 0.5), 13) or $this->isSpectator()){
+						if(!$this->canInteract($blockVector->add(0.5, 0.5, 0.5), 13)){
 						}elseif($this->isCreative()){
 							$item = $this->inventory->getItemInHand();
 							if($this->level->useItemOn($blockVector, $item, $face, $packet->trData->clickPos, $this, true)){
@@ -2538,7 +2569,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 						}
 
 						$ev = new PlayerInteractEvent($this, $item, null, $directionVector, $face, PlayerInteractEvent::RIGHT_CLICK_AIR);
-						if($this->hasItemCooldown($item)){
+						if($this->hasItemCooldown($item) or $this->isSpectator()){
 							$ev->setCancelled();
 						}
 
@@ -2589,7 +2620,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 						$heldItem = $this->inventory->getItemInHand();
 						$oldItem = clone $heldItem;
 
-						if(!$this->canInteract($target, 8)){
+						if(!$this->canInteract($target, 8) or $this->isSpectator()){
 							$cancelled = true;
 						}elseif($target instanceof Player){
 							if(!$this->server->getConfigBool("pvp")){
@@ -2751,7 +2782,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleBlockPickRequest(BlockPickRequestPacket $packet) : bool{
-		$block = $this->level->getBlockAt($packet->blockX, $packet->blockY, $packet->blockZ);
+		$block = $this->getLevelNonNull->getBlockAt($packet->blockX, $packet->blockY, $packet->blockZ);
 		if($block instanceof UnknownBlock){
 			return true;
 		}
@@ -3302,6 +3333,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return false;
 	}
 
+	public function addTitle(string $title, string $subtitle = "", int $fadeIn = -1, int $stay = -1, int $fadeOut = -1) : void{
+		$this->sendTitle($title, $subtitle, $fadeIn, $stay, $fadeOut);
+	}
+
 	/**
 	 * Adds a title text to the user's screen, with an optional subtitle.
 	 *
@@ -3311,12 +3346,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 *
 	 * @return void
 	 */
-	public function addTitle(string $title, string $subtitle = "", int $fadeIn = -1, int $stay = -1, int $fadeOut = -1){
+	public function sendTitle(string $title, string $subtitle = "", int $fadeIn = -1, int $stay = -1, int $fadeOut = -1) : void{
 		$this->setTitleDuration($fadeIn, $stay, $fadeOut);
 		if($subtitle !== ""){
-			$this->addSubTitle($subtitle);
+			$this->sendSubTitle($subtitle);
 		}
 		$this->sendTitleText($title, SetTitlePacket::TYPE_SET_TITLE);
+	}
+
+	public function addSubTitle(string $subtitle) : void{
+		$this->sendSubTitle($subtitle);
 	}
 
 	/**
@@ -3324,8 +3363,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 *
 	 * @return void
 	 */
-	public function addSubTitle(string $subtitle){
+	public function sendSubTitle(string $subtitle) : void{
 		$this->sendTitleText($subtitle, SetTitlePacket::TYPE_SET_SUBTITLE);
+	}
+
+	public function addActionBarMessage(string $message) : void{
+		$this->sendActionBarMessage($message);
 	}
 
 	/**
@@ -3333,7 +3376,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 *
 	 * @return void
 	 */
-	public function addActionBarMessage(string $message){
+	public function sendActionBarMessage(string $message){
 		$this->sendTitleText($message, SetTitlePacket::TYPE_SET_ACTIONBAR_MESSAGE);
 	}
 
@@ -3628,7 +3671,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		parent::saveNBT();
 
 		if($this->isValid()){
-			$this->namedtag->setString("Level", $this->level->getFolderName());
+			$this->namedtag->setString("Level", $this->getLevelNonNull()->getFolderName());
 		}
 
 		if($this->hasValidSpawnPosition()){
@@ -3676,7 +3719,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		//main inventory and drops the rest on the ground.
 		$this->doCloseInventory();
 
-		$ev = new PlayerDeathEvent($this, $this->getDrops());
+		$ev = new PlayerDeathEvent($this, $this->getDrops(), null, $this->getXpDropAmount());
 		$ev->call();
 
 		if(!$ev->getKeepInventory()){
@@ -3716,7 +3759,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$ev = new PlayerRespawnEvent($this, $this->getSpawn());
 		$ev->call();
 
-		$realSpawn = Position::fromObject($ev->getRespawnPosition()->add(0.5, 0, 0.5), $ev->getRespawnPosition()->getLevel());
+		$realSpawn = Position::fromObject($ev->getRespawnPosition()->add(0.5, 0, 0.5), $ev->getRespawnPosition()->getLevelNonNull());
 		$this->teleport($realSpawn);
 
 		$this->setSprinting(false);

@@ -59,9 +59,9 @@ abstract class BaseLevelProvider implements LevelProvider{
 			throw new LevelException("Failed to read level.dat (permission denied or doesn't exist)");
 		}
 		$rawLevelData = @zlib_decode($compressedLevelData);
-		if($rawLevelData === false){	
+		if($rawLevelData === false){
 			throw new LevelException("Failed to decompress level.dat contents (probably corrupted)");
-		}	
+		}
 		$nbt = new BigEndianNBTStream();
 		try{
 			$levelData = $nbt->read($rawLevelData);
