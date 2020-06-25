@@ -603,7 +603,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @return mixed[][], members are in the structure [name => [type, value]]
 	 * @phpstan-return array<string, array{0: int, 1: bool|int|float}>
 	 */
-	public function () : array{
+	public function getGameRules() : array{
 		$count = $this->getUnsignedVarInt();
 		$rules = [];
 		for($i = 0; $i < $count; ++$i){

@@ -154,7 +154,7 @@ use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\SkinData;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
-use pocketmine\network\mcpe\protocol\types\GameMode
+use pocketmine\network\mcpe\protocol\types\GameMode;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\VerifyLoginTask;
@@ -1349,7 +1349,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			self::SURVIVAL => GameMode::SURVIVAL,
 			self::CREATIVE => GameMode::CREATIVE,
 			self::ADVENTURE => GameMode::ADVENTURE,
-			self::SPECTATOR => GameMode::SPECTATOR
+			self::SPECTATOR => GameMode::CREATIVE
 		];
 		return $map[$gamemode & 0x3];
 	}
@@ -2110,7 +2110,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->dataPacket($pk);
 	}
 
-	public function PackClientResponse(ResourcePackClientResponsePacket $packet) : bool{
+	public function handleResourcePackClientResponse(ResourcePackClientResponsePacket $packet) : bool{
 		if($this->resourcePacksDone){
 			return false;
 		}
